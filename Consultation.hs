@@ -1,11 +1,61 @@
-
 module Consultation where
 
 import qualified Graphics.UI.Threepenny as UI
 import Graphics.UI.Threepenny.Core
+import System.IO
+import Control.Exception (try, IOException)
+import Data.List (intercalate)
 
 type Consultation = (String, String, String, String, String) -- (Fecha, Doctor, Diagnóstico, Tratamiento, Observaciones)
 
+csvFile :: FilePath
+csvFile = "consultations.csv"
+
+-- Guardar consultas en un archivo CSV
+saveConsultations :: [Consultation] -> IO ()
+saveConsultations consultations = do
+    let csvData = unlines $ map formatConsultationCSV consultations
+    putStrLn "Guardando las siguientes consultas en el archivo CSV:"  -- Depuración
+    putStrLn csvData  -- Muestra las consultas que se van a guardar
+    writeFile csvFile csvData  -- Sobrescribe todo el archivo con las consultas nuevas
+
+-- Leer consultas desde un archivo CSV
+loadConsultations :: IO [Consultation]
+loadConsultations = do
+    content <- readFileSafe csvFile
+    let linesContent = lines content
+    putStrLn "Cargando las siguientes consultas desde el archivo CSV:"  -- Depuración
+    putStrLn content  -- Muestra el contenido del archivo cargado
+    return $ map parseConsultationCSV linesContent
+
+-- Leer archivo de manera segura
+readFileSafe :: FilePath -> IO String
+readFileSafe path = do
+    handle <- try (readFile path) :: IO (Either IOException String)
+    case handle of
+        Left _  -> return ""  -- Si no existe o ocurre un error, devuelve un string vacío
+        Right c -> return c
+
+-- Formatear una consulta como línea CSV
+formatConsultationCSV :: Consultation -> String
+formatConsultationCSV (date, doctor, diagnosis, treatment, notes) =
+    intercalate "," [date, doctor, diagnosis, treatment, notes]
+
+-- Parsear una línea CSV a una consulta
+parseConsultationCSV :: String -> Consultation
+parseConsultationCSV line =
+    let parts = splitOnChar ',' line
+    in case parts of
+        [date, doctor, diagnosis, treatment, notes] -> (date, doctor, diagnosis, treatment, notes)
+        _ -> ("", "", "", "", "") -- Manejo de errores en caso de que la línea esté incompleta
+
+-- Dividir una cadena en partes según un delimitador (reemplaza a `splitOn`)
+splitOnChar :: Char -> String -> [String]
+splitOnChar _ [] = [""]
+splitOnChar delimiter str =
+    foldr (\c acc -> if c == delimiter then "":acc else (c : head acc) : tail acc) [""] str
+
+-- Lógica de la interfaz
 runConsultation :: Window -> [Consultation] -> UI ()
 runConsultation window consultations = do
     -- Títulos y botones
@@ -65,9 +115,22 @@ createConsultation window consultations = do
         treatment <- get value inputTreatment
         notes <- get value inputNotes
         let newConsultation = (date, doctor, diagnosis, treatment, notes)
-        liftIO $ putStrLn $ "Consulta registrada: " ++ show newConsultation
+        
+        -- Guardar la nueva consulta
+        liftIO $ do
+            existingConsultations <- loadConsultations
+            let updatedConsultations = existingConsultations ++ [newConsultation]
+            saveConsultations updatedConsultations  -- Guardar en el archivo CSV
+            putStrLn $ "Consulta registrada: " ++ show newConsultation
+        
+        -- Recargar las consultas después de guardar
+        updatedConsultations <- liftIO loadConsultations
+
+        -- Mostrar mensaje de éxito
         runFunction $ ffi "alert('Consulta registrada exitosamente')"
-        runConsultation window (consultations ++ [newConsultation])
+        
+        -- Volver a mostrar las consultas
+        runConsultation window updatedConsultations
     
     on UI.click btnCancel $ \_ -> runConsultation window consultations
 
