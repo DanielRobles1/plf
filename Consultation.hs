@@ -2,6 +2,8 @@ module Consultation where
 
 import qualified Graphics.UI.Threepenny as UI
 import Graphics.UI.Threepenny.Core
+
+import Control.Monad (void)
 import System.IO
 import Control.Exception (try, IOException)
 import Data.List (intercalate)
@@ -13,7 +15,9 @@ csvFile = "consultations.csv"
 
 -- Guardar consultas en un archivo CSV
 saveConsultations :: [Consultation] -> IO ()
+
 saveConsultations consultations = do
+    
     let csvData = unlines $ map formatConsultationCSV consultations
     putStrLn "Guardando las siguientes consultas en el archivo CSV:"  -- Depuración
     putStrLn csvData  -- Muestra las consultas que se van a guardar
@@ -57,6 +61,7 @@ splitOnChar delimiter str =
 
 -- Lógica de la interfaz
 runConsultation :: Window -> [Consultation] -> UI ()
+
 runConsultation window consultations = do
     -- Títulos y botones con estilo
     menuTitle <- UI.h1 # set text "Hojas de Consulta"
@@ -108,7 +113,7 @@ runConsultation window consultations = do
 
     -- Acciones de los botones
     on UI.click btnNew $ \_ -> createConsultation window consultations
-    on UI.click btnView $ \_ -> viewConsultations window consultations
+    on UI.click btnView $ \_ ->viewConsultations window consultations
     on UI.click btnBack $ \_ -> do
         getBody window # set children [] -- Limpia la ventana
         runFunction $ ffi "alert('Volviendo al menú principal')"
@@ -186,6 +191,7 @@ createConsultation window consultations = do
 
     -- Acciones de los botones
     on UI.click btnSave $ \_ -> do
+        getBody window # set children [] -- Limpia la ventana
         date <- get value inputDate
         doctor <- get value inputDoctor
         diagnosis <- get value inputDiagnosis
@@ -209,21 +215,56 @@ createConsultation window consultations = do
         -- Volver a mostrar las consultas
         runConsultation window updatedConsultations
     
-    on UI.click btnCancel $ \_ -> runConsultation window consultations
+    on UI.click btnCancel $ \_ -> do
+         getBody window # set children [] -- Limpia la ventana
+         runConsultation window consultations
 
+
+-- Función auxiliar para convertir una consulta en un elemento estilizado de UI
+createConsultationElement :: Consultation -> UI Element
+createConsultationElement (date, doctor, diagnosis, treatment, notes) = do
+    -- Estructura tipo "tarjeta"
+    UI.div #+ 
+        [ UI.h3 # set text ("Fecha: " ++ date)
+                # set style [("font-size", "20px"),
+                             ("color", "#3498db"),
+                             ("font-weight", "bold"),
+                             ("margin-bottom", "5px")]
+        , UI.p # set text ("Doctor: " ++ doctor)
+               # set style [("margin", "5px 0"),
+                            ("color", "#2c3e50")]
+        , UI.p # set text ("Diagnóstico: " ++ diagnosis)
+               # set style [("margin", "5px 0"),
+                            ("color", "#2c3e50")]
+        , UI.p # set text ("Tratamiento: " ++ treatment)
+               # set style [("margin", "5px 0"),
+                            ("color", "#2c3e50")]
+        , UI.p # set text ("Observaciones: " ++ notes)
+               # set style [("margin", "5px 0"),
+                            ("color", "#2c3e50"),
+                            ("font-style", "italic")]
+        ] # set style [("border", "1px solid #ccc"),
+                       ("border-radius", "8px"),
+                       ("padding", "15px"),
+                       ("margin", "10px 0"),
+                       ("background-color", "#f9f9f9"),
+                       ("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)"),
+                       ("width", "80%"),
+                       ("margin-left", "auto"),
+                       ("margin-right", "auto")]
+
+-- Función principal para mostrar las consultas con diseño actualizado
 viewConsultations :: Window -> [Consultation] -> UI ()
 viewConsultations window consultations = do
-    -- Limpia el contenido actual de la ventana
-    getBody window # set children []
+    getBody window # set children [] -- Limpia la ventana
 
-    -- Título de la página con estilo
     title <- UI.h1 # set text "Consultas Registradas"
                    # set style [("font-size", "36px"),
                                ("color", "#2c3e50"),
                                ("text-align", "center"),
+                               ("margin-bottom", "20px"),
                                ("font-family", "Arial, sans-serif")]
 
-    -- Si no hay consultas, muestra un mensaje
     consultationsLayout <- if null consultations
         then UI.p # set text "No hay consultas registradas."
                   # set style [("font-size", "18px"),
@@ -232,7 +273,6 @@ viewConsultations window consultations = do
                               ("font-family", "Arial, sans-serif")]
         else UI.div #+ map createConsultationElement consultations
 
-    -- Botón para regresar con estilo
     btnBack <- UI.button # set text "Volver"
                          # set style [("background-color", "#e74c3c"),
                                      ("color", "white"),
@@ -240,9 +280,9 @@ viewConsultations window consultations = do
                                      ("border-radius", "8px"),
                                      ("border", "none"),
                                      ("font-size", "16px"),
-                                     ("cursor", "pointer")]
+                                     ("cursor", "pointer"),
+                                     ("margin-top", "20px")]
 
-    -- Estructura de la página
     layout <- column
         [ element title
         , element consultationsLayout
@@ -251,25 +291,7 @@ viewConsultations window consultations = do
                       ("padding", "20px"),
                       ("font-family", "Arial, sans-serif")]
 
-    -- Agrega la estructura al cuerpo de la ventana
     getBody window #+ [element layout]
 
-    -- Acción del botón "Volver"
     on UI.click btnBack $ \_ -> runConsultation window consultations
-
--- Función auxiliar para convertir una consulta en un elemento de UI
-createConsultationElement :: Consultation -> UI Element
-createConsultationElement consultation = do
-    UI.p # set text (formatConsultation consultation)
-         # set style [("font-size", "18px"),
-                      ("color", "#2c3e50"),
-                      ("font-family", "Arial, sans-serif"),
-                      ("margin-bottom", "15px")]
-
-formatConsultation :: Consultation -> String
-formatConsultation (date, doctor, diagnosis, treatment, notes) =
-    "Fecha: " ++ date ++
-    ", Doctor: " ++ doctor ++
-    ", Diagnóstico: " ++ diagnosis ++
-    ", Tratamiento: " ++ treatment ++
-    ", Observaciones: " ++ notes
+    
