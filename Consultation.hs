@@ -26,12 +26,12 @@ saveConsultations consultations = do
 -- Leer consultas desde un archivo CSV
 loadConsultations :: IO [Consultation]
 loadConsultations = do
-    content <- readFileSafe csvFile
-    let linesContent = lines content
-    putStrLn "Cargando las siguientes consultas desde el archivo CSV:"  -- Depuración
-    putStrLn content  -- Muestra el contenido del archivo cargado
-    return $ map parseConsultationCSV linesContent
+    result <- try (readFile csvFile) :: IO (Either IOException String)
+    case result of
+        Left _ -> return []  -- Si no existe el archivo, retornar una lista vacía
+        Right content -> return (map parseConsultationCSV (lines content))
 
+  
 -- Leer archivo de manera segura
 readFileSafe :: FilePath -> IO String
 readFileSafe path = do
@@ -294,4 +294,5 @@ viewConsultations window consultations = do
     getBody window #+ [element layout]
 
     on UI.click btnBack $ \_ -> runConsultation window consultations
+    
     

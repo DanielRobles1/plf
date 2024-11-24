@@ -4,11 +4,10 @@ module Main where
 
 import qualified Graphics.UI.Threepenny as UI
 import Graphics.UI.Threepenny.Core
-
 import Control.Monad (void)
-
+import qualified SearchSystem
 import Consultation
-import PatientManagement -- Asegúrate de que este módulo esté importado correctamente
+import PatientManagement -- Asegúrate de que este módulo esté implementado correctamente
 
 main :: IO ()
 main = do
@@ -21,10 +20,10 @@ setup window = do
 
     -- Crear el encabezado con un diseño moderno
     header <- UI.div # set style [("background-color", "#3498db"),
-                                 ("color", "white"),
-                                 ("text-align", "center"),
-                                 ("padding", "20px 0"),
-                                 ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
+                                  ("color", "white"),
+                                  ("text-align", "center"),
+                                  ("padding", "20px 0"),
+                                  ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
                      #+ [UI.h1 # set text "Bienvenido al Sistema Médico" 
                                # set style [("font-size", "28px"),
                                            ("font-family", "Arial, sans-serif"),
@@ -47,55 +46,64 @@ setup window = do
 
     -- Crear los botones estilizados
     btnConsultations <- UI.button # set text "Hojas de Consulta" 
-                                 # set style [("background-color", "#2ecc71"),
-                                             ("color", "white"),
-                                             ("padding", "15px 30px"),
-                                             ("border-radius", "8px"),
-                                             ("border", "none"),
-                                             ("font-size", "16px"),
-                                             ("cursor", "pointer"),
-                                             ("margin", "10px")]
+                                  # set style [("background-color", "#2ecc71"),
+                                              ("color", "white"),
+                                              ("padding", "15px 30px"),
+                                              ("border-radius", "8px"),
+                                              ("border", "none"),
+                                              ("font-size", "16px"),
+                                              ("cursor", "pointer"),
+                                              ("margin", "10px")]
     btnPatientManagement <- UI.button # set text "Gestión de Expedientes" 
-                                     # set style [("background-color", "#3498db"),
-                                                 ("color", "white"),
-                                                 ("padding", "15px 30px"),
-                                                 ("border-radius", "8px"),
-                                                 ("border", "none"),
-                                                 ("font-size", "16px"),
-                                                 ("cursor", "pointer"),
-                                                 ("margin", "10px")]
+                                      # set style [("background-color", "#3498db"),
+                                                  ("color", "white"),
+                                                  ("padding", "15px 30px"),
+                                                  ("border-radius", "8px"),
+                                                  ("border", "none"),
+                                                  ("font-size", "16px"),
+                                                  ("cursor", "pointer"),
+                                                  ("margin", "10px")]
+    btnSearch <- UI.button # set text "Búsqueda Médica"
+                           # set style [("background-color", "#9b59b6"),
+                                       ("color", "white"),
+                                       ("padding", "15px 30px"),
+                                       ("border-radius", "8px"),
+                                       ("border", "none"),
+                                       ("font-size", "16px"),
+                                       ("cursor", "pointer"),
+                                       ("margin", "10px")]
     btnExit <- UI.button # set text "Salir" 
-                        # set style [("background-color", "#e74c3c"),
-                                    ("color", "white"),
-                                    ("padding", "15px 30px"),
-                                    ("border-radius", "8px"),
-                                    ("border", "none"),
-                                    ("font-size", "16px"),
-                                    ("cursor", "pointer"),
-                                    ("margin", "10px")]
+                         # set style [("background-color", "#e74c3c"),
+                                     ("color", "white"),
+                                     ("padding", "15px 30px"),
+                                     ("border-radius", "8px"),
+                                     ("border", "none"),
+                                     ("font-size", "16px"),
+                                     ("cursor", "pointer"),
+                                     ("margin", "10px")]
 
     -- Crear el pie de página
     footer <- UI.div # set style [("background-color", "#2c3e50"),
-                                ("color", "white"),
-                                ("text-align", "center"),
-                                ("padding", "10px 0"),
-                                ("position", "absolute"),
-                                ("bottom", "0"),
-                                ("width", "100%"),
-                                ("font-family", "Arial, sans-serif"),
-                                ("box-shadow", "0px -4px 8px rgba(0,0,0,0.1)")]
+                                  ("color", "white"),
+                                  ("text-align", "center"),
+                                  ("padding", "10px 0"),
+                                  ("position", "absolute"),
+                                  ("bottom", "0"),
+                                  ("width", "100%"),
+                                  ("font-family", "Arial, sans-serif"),
+                                  ("box-shadow", "0px -4px 8px rgba(0,0,0,0.1)")]
                      #+ [UI.p # set text "© 2024 Sistema Médico. Todos los derechos reservados."]
 
-    -- Definir la disposición inicial
+    -- Disposición inicial
     layout <- column
         [ element menuTitle
         , element menuInfo
-        , row [element btnConsultations, element btnPatientManagement, element btnExit]
+        , row [element btnConsultations, element btnPatientManagement, element btnSearch, element btnExit]
         ] # set style [("display", "flex"), 
                       ("flex-direction", "column"), 
                       ("align-items", "center"), 
                       ("justify-content", "center"),
-                      ("height", "calc(100vh - 120px)"), -- Restar espacio para header y footer
+                      ("height", "calc(100vh - 120px)"),
                       ("margin", "0 auto")]
 
     -- Aplicar estilo general al cuerpo
@@ -107,17 +115,19 @@ setup window = do
     -- Agregar elementos iniciales al cuerpo
     getBody window #+ [element header, element layout, element footer]
 
-    -- Acción del botón "Hojas de Consulta"
+    -- Acciones de los botones
     on UI.click btnConsultations $ \_ -> do 
         limpiarPantalla window
-        runConsultation window []
+        runConsultation window [] -- Llama al módulo de consultas
 
-    -- Acción del botón "Gestión de Expedientes"
     on UI.click btnPatientManagement $ \_ -> do
         limpiarPantalla window
-        runPatientManagement window  -- Llama a la función principal del módulo PatientManagement
+        runPatientManagement window  -- Llama al módulo de gestión de pacientes
 
-    -- Acción del botón "Salir"
+    on UI.click btnSearch $ \_ -> do
+        limpiarPantalla window
+        SearchSystem.setup window -- Llama al módulo de búsqueda
+
     on UI.click btnExit $ \_ -> do
         limpiarPantalla window
         runFunction $ ffi "alert('Saliendo del sistema médico...'); window.close()"
@@ -125,4 +135,4 @@ setup window = do
 -- Función para limpiar la pantalla antes de cargar nuevo contenido
 limpiarPantalla :: Window -> UI ()
 limpiarPantalla window = do
-    void $ getBody window # set children [] -- Usa void para ignorar el resultado
+    void $ getBody window # set children []
