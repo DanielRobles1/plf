@@ -1,9 +1,5 @@
-{-# LANGUAGE OverloadedStrings #-}
+
 module Consultation where
-import qualified Graphics.UI.Threepenny as UI
-import Graphics.UI.Threepenny.Core
-
-
 
 import qualified Graphics.UI.Threepenny as UI
 import Graphics.UI.Threepenny.Core
@@ -75,36 +71,40 @@ createConsultation window consultations = do
     
     on UI.click btnCancel $ \_ -> runConsultation window consultations
 
-    viewConsultations :: Window -> [Consultation] -> UI ()
-    viewConsultations window consultations = do
-        -- Limpia el contenido actual de la ventana
-        getBody window # set children []
-    
-        -- Título de la página
-        title <- UI.h1 # set text "Consultas Registradas"
-    
-        -- Si no hay consultas, muestra un mensaje
-        consultationsLayout <- if null consultations
-            then UI.p # set text "No hay consultas registradas."
-            else UI.div #+ map (UI.p # set text . formatConsultation) consultations
-    
-        -- Botón para regresar
-        btnBack <- UI.button # set text "Volver"
-    
-        -- Estructura de la página
-        layout <- column
-            [ element title
-            , element consultationsLayout
-            , element btnBack
-            ]
-    
-        -- Agrega la estructura al cuerpo de la ventana
-        getBody window #+ [element layout]
-    
-        -- Acción del botón "Volver"
-        on UI.click btnBack $ \_ -> runConsultation window consultations
-    
-    
+viewConsultations :: Window -> [Consultation] -> UI ()
+viewConsultations window consultations = do
+    -- Limpia el contenido actual de la ventana
+    getBody window # set children []
+
+    -- Título de la página
+    title <- UI.h1 # set text "Consultas Registradas"
+
+    -- Si no hay consultas, muestra un mensaje
+    consultationsLayout <- if null consultations
+        then UI.p # set text "No hay consultas registradas."
+        else UI.div #+ map createConsultationElement consultations
+
+    -- Botón para regresar
+    btnBack <- UI.button # set text "Volver"
+
+    -- Estructura de la página
+    layout <- column
+        [ element title
+        , element consultationsLayout
+        , element btnBack
+        ]
+
+    -- Agrega la estructura al cuerpo de la ventana
+    getBody window #+ [element layout]
+
+    -- Acción del botón "Volver"
+    on UI.click btnBack $ \_ -> runConsultation window consultations
+
+-- Función auxiliar para convertir una consulta en un elemento de UI
+createConsultationElement :: Consultation -> UI Element
+createConsultationElement consultation = do
+    UI.p # set text (formatConsultation consultation)
+
 formatConsultation :: Consultation -> String
 formatConsultation (date, doctor, diagnosis, treatment, notes) =
     "Fecha: " ++ date ++
