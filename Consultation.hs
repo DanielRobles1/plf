@@ -58,19 +58,51 @@ splitOnChar delimiter str =
 -- Lógica de la interfaz
 runConsultation :: Window -> [Consultation] -> UI ()
 runConsultation window consultations = do
-    -- Títulos y botones
+    -- Títulos y botones con estilo
     menuTitle <- UI.h1 # set text "Hojas de Consulta"
+                        # set style [("font-size", "36px"),
+                                    ("color", "#2c3e50"),
+                                    ("text-align", "center"),
+                                    ("font-family", "Arial, sans-serif")]
     menuInfo <- UI.p # set text "Seleccione una opción:"
-    
+                     # set style [("font-size", "18px"),
+                                 ("color", "#34495e"),
+                                 ("text-align", "center"),
+                                 ("font-family", "Arial, sans-serif")]
+
     btnNew <- UI.button # set text "Crear Nueva Consulta"
+                        # set style [("background-color", "#00bfae"),
+                                    ("color", "white"),
+                                    ("padding", "12px 25px"),
+                                    ("border-radius", "8px"),
+                                    ("border", "none"),
+                                    ("font-size", "16px"),
+                                    ("cursor", "pointer")]
     btnView <- UI.button # set text "Ver Consultas"
+                         # set style [("background-color", "#3498db"),
+                                     ("color", "white"),
+                                     ("padding", "12px 25px"),
+                                     ("border-radius", "8px"),
+                                     ("border", "none"),
+                                     ("font-size", "16px"),
+                                     ("cursor", "pointer")]
     btnBack <- UI.button # set text "Volver"
+                         # set style [("background-color", "#e74c3c"),
+                                     ("color", "white"),
+                                     ("padding", "12px 25px"),
+                                     ("border-radius", "8px"),
+                                     ("border", "none"),
+                                     ("font-size", "16px"),
+                                     ("cursor", "pointer")]
 
     layout <- column
         [ element menuTitle
         , element menuInfo
         , row [element btnNew, element btnView, element btnBack]
-        ]
+        ] # set style [("text-align", "center"),
+                      ("margin-top", "30px"),
+                      ("padding", "20px"),
+                      ("font-family", "Arial, sans-serif")]
 
     getBody window #+ [element layout]
 
@@ -85,15 +117,58 @@ createConsultation :: Window -> [Consultation] -> UI ()
 createConsultation window consultations = do
     getBody window # set children [] -- Limpia la ventana
 
-    -- Entradas de texto
+    -- Entradas de texto con diseño
     title <- UI.h1 # set text "Crear Nueva Consulta"
+                   # set style [("font-size", "36px"),
+                               ("color", "#2c3e50"),
+                               ("text-align", "center"),
+                               ("font-family", "Arial, sans-serif")]
     inputDate <- UI.input # set (UI.attr "placeholder") "Fecha (dd/mm/aaaa)"
+                          # set style [("padding", "10px"),
+                                      ("border", "1px solid #ccc"),
+                                      ("border-radius", "4px"),
+                                      ("font-size", "16px"),
+                                      ("width", "80%")]
     inputDoctor <- UI.input # set (UI.attr "placeholder") "Nombre del Doctor"
+                            # set style [("padding", "10px"),
+                                        ("border", "1px solid #ccc"),
+                                        ("border-radius", "4px"),
+                                        ("font-size", "16px"),
+                                        ("width", "80%")]
     inputDiagnosis <- UI.input # set (UI.attr "placeholder") "Diagnóstico"
+                              # set style [("padding", "10px"),
+                                          ("border", "1px solid #ccc"),
+                                          ("border-radius", "4px"),
+                                          ("font-size", "16px"),
+                                          ("width", "80%")]
     inputTreatment <- UI.input # set (UI.attr "placeholder") "Tratamiento"
+                              # set style [("padding", "10px"),
+                                          ("border", "1px solid #ccc"),
+                                          ("border-radius", "4px"),
+                                          ("font-size", "16px"),
+                                          ("width", "80%")]
     inputNotes <- UI.textarea # set (UI.attr "placeholder") "Observaciones"
+                              # set style [("padding", "10px"),
+                                          ("border", "1px solid #ccc"),
+                                          ("border-radius", "4px"),
+                                          ("font-size", "16px"),
+                                          ("width", "80%")]
     btnSave <- UI.button # set text "Guardar"
+                        # set style [("background-color", "#00bfae"),
+                                    ("color", "white"),
+                                    ("padding", "12px 25px"),
+                                    ("border-radius", "8px"),
+                                    ("border", "none"),
+                                    ("font-size", "16px"),
+                                    ("cursor", "pointer")]
     btnCancel <- UI.button # set text "Cancelar"
+                          # set style [("background-color", "#e74c3c"),
+                                      ("color", "white"),
+                                      ("padding", "12px 25px"),
+                                      ("border-radius", "8px"),
+                                      ("border", "none"),
+                                      ("font-size", "16px"),
+                                      ("cursor", "pointer")]
 
     layout <- column
         [ element title
@@ -103,7 +178,9 @@ createConsultation window consultations = do
         , element inputTreatment
         , element inputNotes
         , row [element btnSave, element btnCancel]
-        ]
+        ] # set style [("text-align", "center"),
+                      ("padding", "20px"),
+                      ("font-family", "Arial, sans-serif")]
 
     getBody window #+ [element layout]
 
@@ -139,23 +216,40 @@ viewConsultations window consultations = do
     -- Limpia el contenido actual de la ventana
     getBody window # set children []
 
-    -- Título de la página
+    -- Título de la página con estilo
     title <- UI.h1 # set text "Consultas Registradas"
+                   # set style [("font-size", "36px"),
+                               ("color", "#2c3e50"),
+                               ("text-align", "center"),
+                               ("font-family", "Arial, sans-serif")]
 
     -- Si no hay consultas, muestra un mensaje
     consultationsLayout <- if null consultations
         then UI.p # set text "No hay consultas registradas."
+                  # set style [("font-size", "18px"),
+                              ("color", "#34495e"),
+                              ("text-align", "center"),
+                              ("font-family", "Arial, sans-serif")]
         else UI.div #+ map createConsultationElement consultations
 
-    -- Botón para regresar
+    -- Botón para regresar con estilo
     btnBack <- UI.button # set text "Volver"
+                         # set style [("background-color", "#e74c3c"),
+                                     ("color", "white"),
+                                     ("padding", "12px 25px"),
+                                     ("border-radius", "8px"),
+                                     ("border", "none"),
+                                     ("font-size", "16px"),
+                                     ("cursor", "pointer")]
 
     -- Estructura de la página
     layout <- column
         [ element title
         , element consultationsLayout
         , element btnBack
-        ]
+        ] # set style [("text-align", "center"),
+                      ("padding", "20px"),
+                      ("font-family", "Arial, sans-serif")]
 
     -- Agrega la estructura al cuerpo de la ventana
     getBody window #+ [element layout]
@@ -167,6 +261,10 @@ viewConsultations window consultations = do
 createConsultationElement :: Consultation -> UI Element
 createConsultationElement consultation = do
     UI.p # set text (formatConsultation consultation)
+         # set style [("font-size", "18px"),
+                      ("color", "#2c3e50"),
+                      ("font-family", "Arial, sans-serif"),
+                      ("margin-bottom", "15px")]
 
 formatConsultation :: Consultation -> String
 formatConsultation (date, doctor, diagnosis, treatment, notes) =
