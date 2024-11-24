@@ -1,52 +1,237 @@
 module PatientManagement where
 
-import Data.List (find)
-import Data.IORef  -- Necesario para trabajar con IORef
-import System.IO.Unsafe (unsafePerformIO)  -- Para crear variables globales
+import qualified Graphics.UI.Threepenny as UI
+import Graphics.UI.Threepenny.Core
+import Data.List (find, intercalate)
+import Control.Monad (void)
+import Graphics.UI.Threepenny.Core (split)
 
--- Tipo para representar a un paciente
+import System.IO
+import Control.Exception (try, IOException)
+
 type Patient = (String, String, String) -- (Nombre, FechaNacimiento, Diagnóstico)
-
--- Lista mutable de pacientes (se actualizará en cada operación)
-patients :: IORef [Patient]
-patients = unsafePerformIO (newIORef [])
+csvFile :: FilePath
+csvFile = "patients.csv"
 
 -- Función principal para ejecutar el sistema de gestión de pacientes
-runPatientManagement :: IO ()
-runPatientManagement = do
-    putStrLn "Gestión de Expedientes"
-    putStrLn "1. Registrar nuevo paciente"
-    putStrLn "2. Ver expediente"
-    putStrLn "0. Volver"
-    option <- getLine
-    case option of
-        "1" -> registerPatient
-        "2" -> viewPatient
-        "0" -> return ()
-        _   -> putStrLn "Opción no válida" >> runPatientManagement
+runPatientManagement :: Window -> UI ()
+runPatientManagement window = do
+    -- Títulos y botones con estilo
+    menuTitle <- UI.h1 # set text "Gestión de Expedientes"
+                        # set style [("font-size", "36px"),
+                                    ("color", "#2c3e50"),
+                                    ("text-align", "center"),
+                                    ("font-family", "Arial, sans-serif")]
+    menuInfo <- UI.p # set text "Seleccione una opción:"
+                     # set style [("font-size", "18px"),
+                                 ("color", "#34495e"),
+                                 ("text-align", "center"),
+                                 ("font-family", "Arial, sans-serif")]
 
--- Función para registrar un nuevo paciente
-registerPatient :: IO ()
-registerPatient = do
-    putStrLn "Ingrese el nombre del paciente:"
-    name <- getLine
-    putStrLn "Ingrese la fecha de nacimiento (dd/mm/aaaa):"
-    dob <- getLine
-    putStrLn "Ingrese el diagnóstico inicial:"
-    diagnosis <- getLine
-    let newPatient = (name, dob, diagnosis)
-    -- Actualizar la lista de pacientes
-    modifyIORef patients (\p -> newPatient : p)
-    putStrLn $ "Paciente registrado: " ++ show newPatient
-    runPatientManagement
+    btnRegister <- UI.button # set text "Registrar nuevo paciente"
+                             # set style [("background-color", "#00bfae"),
+                                         ("color", "white"),
+                                         ("padding", "12px 25px"),
+                                         ("border-radius", "8px"),
+                                         ("border", "none"),
+                                         ("font-size", "16px"),
+                                         ("cursor", "pointer")]
+    btnView <- UI.button # set text "Ver expediente"
+                         # set style [("background-color", "#3498db"),
+                                     ("color", "white"),
+                                     ("padding", "12px 25px"),
+                                     ("border-radius", "8px"),
+                                     ("border", "none"),
+                                     ("font-size", "16px"),
+                                     ("cursor", "pointer")]
+    btnBack <- UI.button # set text "Volver"
+                         # set style [("background-color", "#e74c3c"),
+                                     ("color", "white"),
+                                     ("padding", "12px 25px"),
+                                     ("border-radius", "8px"),
+                                     ("border", "none"),
+                                     ("font-size", "16px"),
+                                     ("cursor", "pointer")]
 
--- Función para ver el expediente de un paciente
-viewPatient :: IO ()
-viewPatient = do
-    putStrLn "Ingrese el nombre del paciente a buscar:"
-    name <- getLine
-    patientList <- readIORef patients
-    case find (\(n, _, _) -> n == name) patientList of
-        Just patient -> putStrLn $ "Expediente: " ++ show patient
-        Nothing      -> putStrLn "Paciente no encontrado."
-    runPatientManagement
+    layout <- column
+        [ element menuTitle
+        , element menuInfo
+        , row [element btnRegister, element btnView, element btnBack]
+        ] # set style [("text-align", "center"),
+                      ("margin-top", "30px"),
+                      ("padding", "20px"),
+                      ("font-family", "Arial, sans-serif")]
+
+    getBody window #+ [element layout]
+
+    -- Acciones de los botones
+    on UI.click btnRegister $ \_ -> createPatientForm window
+    on UI.click btnView $ \_ -> viewPatients window
+    on UI.click btnBack $ \_ -> do
+        getBody window # set children [] -- Limpia la ventana
+        runFunction $ ffi "alert('Volviendo al menú principal')"
+
+-- Crear formulario de registro de paciente
+createPatientForm :: Window -> UI ()
+createPatientForm window = do
+    getBody window # set children [] -- Limpia la ventana
+
+    title <- UI.h1 # set text "Registrar Nuevo Paciente"
+                   # set style [("font-size", "36px"),
+                               ("color", "#2c3e50"),
+                               ("text-align", "center"),
+                               ("font-family", "Arial, sans-serif")]
+    inputName <- UI.input # set (UI.attr "placeholder") "Nombre del paciente"
+                          # set style [("padding", "10px"),
+                                      ("border", "1px solid #ccc"),
+                                      ("border-radius", "4px"),
+                                      ("font-size", "16px"),
+                                      ("width", "80%")]
+    inputDob <- UI.input # set (UI.attr "placeholder") "Fecha de nacimiento (dd/mm/aaaa)"
+                         # set style [("padding", "10px"),
+                                     ("border", "1px solid #ccc"),
+                                     ("border-radius", "4px"),
+                                     ("font-size", "16px"),
+                                     ("width", "80%")]
+    inputDiagnosis <- UI.input # set (UI.attr "placeholder") "Diagnóstico inicial"
+                              # set style [("padding", "10px"),
+                                          ("border", "1px solid #ccc"),
+                                          ("border-radius", "4px"),
+                                          ("font-size", "16px"),
+                                          ("width", "80%")]
+    btnSave <- UI.button # set text "Guardar"
+                        # set style [("background-color", "#00bfae"),
+                                    ("color", "white"),
+                                    ("padding", "12px 25px"),
+                                    ("border-radius", "8px"),
+                                    ("border", "none"),
+                                    ("font-size", "16px"),
+                                    ("cursor", "pointer")]
+    btnCancel <- UI.button # set text "Cancelar"
+                          # set style [("background-color", "#e74c3c"),
+                                      ("color", "white"),
+                                      ("padding", "12px 25px"),
+                                      ("border-radius", "8px"),
+                                      ("border", "none"),
+                                      ("font-size", "16px"),
+                                      ("cursor", "pointer")]
+
+    layout <- column
+        [ element title
+        , element inputName
+        , element inputDob
+        , element inputDiagnosis
+        , row [element btnSave, element btnCancel]
+        ] # set style [("text-align", "center"),
+                      ("padding", "20px"),
+                      ("font-family", "Arial, sans-serif")]
+
+    getBody window #+ [element layout]
+
+    -- Acciones de los botones
+    on UI.click btnSave $ \_ -> do
+        name <- get value inputName
+        dob <- get value inputDob
+        diagnosis <- get value inputDiagnosis
+        let newPatient = (name, dob, diagnosis)
+
+        -- Guardar el nuevo paciente en el archivo CSV
+        liftIO $ appendFile csvFile (formatPatientCSV newPatient ++ "\n")
+        liftIO $ putStrLn $ "Paciente registrado: " ++ show newPatient
+
+        -- Volver al menú principal
+        runPatientManagement window
+
+    on UI.click btnCancel $ \_ -> do
+        -- Volver al menú principal
+        runPatientManagement window
+
+-- Ver pacientes registrados
+viewPatients :: Window -> UI ()
+viewPatients window = do
+    getBody window # set children [] -- Limpia la ventana
+
+    title <- UI.h1 # set text "Pacientes Registrados"
+                   # set style [("font-size", "36px"),
+                               ("color", "#2c3e50"),
+                               ("text-align", "center"),
+                               ("margin-bottom", "20px"),
+                               ("font-family", "Arial, sans-serif")]
+
+    patientsList <- liftIO loadPatients
+    patientsLayout <- if null patientsList
+        then UI.p # set text "No hay pacientes registrados."
+                  # set style [("font-size", "18px"),
+                              ("color", "#34495e"),
+                              ("text-align", "center"),
+                              ("font-family", "Arial, sans-serif")]
+        else UI.div #+ map createPatientElement patientsList
+
+    btnBack <- UI.button # set text "Volver"
+                         # set style [("background-color", "#e74c3c"),
+                                     ("color", "white"),
+                                     ("padding", "12px 25px"),
+                                     ("border-radius", "8px"),
+                                     ("border", "none"),
+                                     ("font-size", "16px"),
+                                     ("cursor", "pointer"),
+                                     ("margin-top", "20px")]
+
+    layout <- column
+        [ element title
+        , element patientsLayout
+        , element btnBack
+        ] # set style [("text-align", "center"),
+                      ("padding", "20px"),
+                      ("font-family", "Arial, sans-serif")]
+
+    getBody window #+ [element layout]
+
+    on UI.click btnBack $ \_ -> runPatientManagement window
+
+-- Crear una representación visual de un paciente
+createPatientElement :: Patient -> UI Element
+createPatientElement (name, dob, diagnosis) = do
+    UI.div #+ 
+        [ UI.h3 # set text ("Nombre: " ++ name)
+                # set style [("font-size", "20px"),
+                             ("color", "#3498db"),
+                             ("font-weight", "bold"),
+                             ("margin-bottom", "5px")]
+        , UI.p # set text ("Fecha de Nacimiento: " ++ dob)
+               # set style [("margin", "5px 0"),
+                            ("color", "#2c3e50")]
+        , UI.p # set text ("Diagnóstico: " ++ diagnosis)
+               # set style [("margin", "5px 0"),
+                            ("color", "#2c3e50")]
+        ] # set style [("border", "1px solid #ccc"),
+                       ("border-radius", "8px"),
+                       ("padding", "15px"),
+                       ("margin", "10px 0"),
+                       ("background-color", "#f9f9f9"),
+                       ("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)")]
+
+-- Función para cargar los pacientes desde el archivo CSV
+loadPatients :: IO [Patient]
+loadPatients = do
+    result <- try (readFile csvFile) :: IO (Either IOException String)
+    case result of
+        Left _ -> return []  -- Si no existe el archivo, retornar una lista vacía
+        Right content -> return (map parsePatient (lines content))
+
+-- Función para analizar la información de un paciente desde el CSV
+parsePatient :: String -> Patient
+parsePatient line =
+    let (name, rest) = break (== ',') line
+        rest' = dropWhile (== ',') rest  -- Eliminar la coma inicial
+        (dob, diagnosis) = break (== ',') rest'
+    in (name, dropWhile (== ',') dob, dropWhile (== ',') diagnosis)
+
+
+-- Formatear un paciente a una línea CSV
+formatPatientCSV :: Patient -> String
+formatPatientCSV (name, dob, diagnosis) = name ++ "," ++ dob ++ "," ++ diagnosis
+
+-- Función principal para iniciar la aplicación
+main :: IO ()
+main = startGUI defaultConfig { jsStatic = Just "static" } runPatientManagement

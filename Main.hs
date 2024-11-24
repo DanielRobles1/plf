@@ -8,6 +8,7 @@ import Graphics.UI.Threepenny.Core
 import Control.Monad (void)
 
 import Consultation
+import PatientManagement -- Asegúrate de que este módulo esté importado correctamente
 
 main :: IO ()
 main = do
@@ -54,6 +55,15 @@ setup window = do
                                              ("font-size", "16px"),
                                              ("cursor", "pointer"),
                                              ("margin", "10px")]
+    btnPatientManagement <- UI.button # set text "Gestión de Expedientes" 
+                                     # set style [("background-color", "#3498db"),
+                                                 ("color", "white"),
+                                                 ("padding", "15px 30px"),
+                                                 ("border-radius", "8px"),
+                                                 ("border", "none"),
+                                                 ("font-size", "16px"),
+                                                 ("cursor", "pointer"),
+                                                 ("margin", "10px")]
     btnExit <- UI.button # set text "Salir" 
                         # set style [("background-color", "#e74c3c"),
                                     ("color", "white"),
@@ -80,7 +90,7 @@ setup window = do
     layout <- column
         [ element menuTitle
         , element menuInfo
-        , row [element btnConsultations, element btnExit]
+        , row [element btnConsultations, element btnPatientManagement, element btnExit]
         ] # set style [("display", "flex"), 
                       ("flex-direction", "column"), 
                       ("align-items", "center"), 
@@ -98,9 +108,14 @@ setup window = do
     getBody window #+ [element header, element layout, element footer]
 
     -- Acción del botón "Hojas de Consulta"
-    on UI.click btnConsultations $ \_ -> do
+    on UI.click btnConsultations $ \_ -> do 
         limpiarPantalla window
         runConsultation window []
+
+    -- Acción del botón "Gestión de Expedientes"
+    on UI.click btnPatientManagement $ \_ -> do
+        limpiarPantalla window
+        runPatientManagement window  -- Llama a la función principal del módulo PatientManagement
 
     -- Acción del botón "Salir"
     on UI.click btnExit $ \_ -> do
