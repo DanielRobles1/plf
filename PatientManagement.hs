@@ -16,6 +16,17 @@ csvFile = "patients.csv"
 -- Función principal para ejecutar el sistema de gestión de pacientes
 runPatientManagement :: Window -> UI ()
 runPatientManagement window = do
+        -- Crear el encabezado con un diseño moderno
+    header <- UI.div # set style [("background-color", "#3498db"),
+                                      ("color", "white"),
+                                    ("text-align", "center"),
+                                    ("padding", "20px 0"),
+                                    ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
+                     #+ [UI.h1 # set text "Bienvenido al Sistema Médico" 
+                 # set style [("font-size", "28px"),
+                 ("font-family", "Arial, sans-serif"),
+                 ("margin", "0")]] 
+
     -- Títulos y botones con estilo
     menuTitle <- UI.h1 # set text "Gestión de Expedientes"
                         # set style [("font-size", "36px"),
@@ -52,17 +63,37 @@ runPatientManagement window = do
                                      ("border", "none"),
                                      ("font-size", "16px"),
                                      ("cursor", "pointer")]
+       -- Crear el pie de página
+    footer <- UI.div # set style [("background-color", "#2c3e50"),
+                                   ("color", "white"),
+                          ("text-align", "center"),
+                            ("padding", "10px 0"),
+                             ("position", "absolute"),
+                             ("bottom", "0"),
+                             ("width", "100%"),
+                             ("font-family", "Arial, sans-serif"),
+                              ("box-shadow", "0px -4px 8px rgba(0,0,0,0.1)")]
+                               #+ [UI.p # set text "© 2024 Sistema Médico. Todos los derechos reservados."]
+
 
     layout <- column
         [ element menuTitle
         , element menuInfo
         , row [element btnRegister, element btnView, element btnBack]
-        ] # set style [("text-align", "center"),
-                      ("margin-top", "30px"),
-                      ("padding", "20px"),
-                      ("font-family", "Arial, sans-serif")]
+        ] # set style [("display", "flex"), 
+                       ("flex-direction", "column"), 
+                      ("align-items", "center"), 
+                      ("justify-content", "center"),
+                      ("height", "calc(100vh - 120px)"),
+                        ("margin", "0 auto")]
+        
+                      -- Aplicar estilo general al cuerpo
+    getBody window # set style [("background-color", "#f4f6f6"),
+                              ("font-family", "Arial, sans-serif"),
+                              ("margin", "0"),
+                              ("padding", "0")]
 
-    getBody window #+ [element layout]
+    getBody window #+ [element header, element layout, element footer]
 
     -- Acciones de los botones
     on UI.click btnRegister $ \_ -> createPatientForm window
