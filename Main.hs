@@ -7,7 +7,9 @@ import Graphics.UI.Threepenny.Core
 import Control.Monad (void)
 import qualified SearchSystem
 import Consultation
-import PatientManagement -- Asegúrate de que este módulo esté implementado correctamente
+import PatientManagement
+import Reports
+import MedicationManagement -- Importa el módulo de gestión de medicamentos
 
 main :: IO ()
 main = do
@@ -72,6 +74,24 @@ setup window = do
                                        ("font-size", "16px"),
                                        ("cursor", "pointer"),
                                        ("margin", "10px")]
+    btnReports <- UI.button # set text "Farmacia"
+                            # set style [("background-color", "#f39c12"),
+                                        ("color", "white"),
+                                        ("padding", "15px 30px"),
+                                        ("border-radius", "8px"),
+                                        ("border", "none"),
+                                        ("font-size", "16px"),
+                                        ("cursor", "pointer"),
+                                        ("margin", "10px")]
+    btnMedication <- UI.button # set text "Despachar Medicamentos"
+                               # set style [("background-color", "#1abc9c"),
+                                           ("color", "white"),
+                                           ("padding", "15px 30px"),
+                                           ("border-radius", "8px"),
+                                           ("border", "none"),
+                                           ("font-size", "16px"),
+                                           ("cursor", "pointer"),
+                                           ("margin", "10px")]
     btnExit <- UI.button # set text "Salir" 
                          # set style [("background-color", "#e74c3c"),
                                      ("color", "white"),
@@ -98,7 +118,7 @@ setup window = do
     layout <- column
         [ element menuTitle
         , element menuInfo
-        , row [element btnConsultations, element btnPatientManagement, element btnSearch, element btnExit]
+        , row [element btnConsultations, element btnPatientManagement, element btnSearch, element btnReports, element btnMedication, element btnExit]
         ] # set style [("display", "flex"), 
                       ("flex-direction", "column"), 
                       ("align-items", "center"), 
@@ -127,6 +147,14 @@ setup window = do
     on UI.click btnSearch $ \_ -> do
         limpiarPantalla window
         SearchSystem.setup window -- Llama al módulo de búsqueda
+
+    on UI.click btnReports $ \_ -> do
+        limpiarPantalla window
+        runReports window
+
+    on UI.click btnMedication $ \_ -> do
+        limpiarPantalla window
+        MedicationManagement.runMedicationManagement window -- Llama al módulo de despacho de medicamentos
 
     on UI.click btnExit $ \_ -> do
         limpiarPantalla window

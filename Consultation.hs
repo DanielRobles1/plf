@@ -63,6 +63,7 @@ splitOnChar delimiter str =
 runConsultation :: Window -> [Consultation] -> UI ()
 
 runConsultation window consultations = do
+    
     -- Títulos y botones con estilo
     menuTitle <- UI.h1 # set text "Hojas de Consulta"
                         # set style [("font-size", "36px"),
