@@ -17,6 +17,15 @@ csvFile = "Medicamentos.csv"
 -- Función principal para ejecutar el sistema de gestión de pacientes
 runReports :: Window -> UI ()
 runReports window = do
+    header <- UI.div # set style [("background-color", "#3498db"),
+          ("color", "white"),
+           ("text-align", "center"),
+             ("padding", "20px 0"),
+             ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
+              #+ [UI.h1 # set text "Bienvenido al Sistema Médico" 
+             # set style [("font-size", "28px"),
+               ("font-family", "Arial, sans-serif"),
+                 ("margin", "0")]]
     -- Títulos y botones con estilo
     menuTitle <- UI.h1 # set text "Medicamentos"
                         # set style [("font-size", "36px"),
@@ -61,17 +70,30 @@ runReports window = do
                                      ("border", "none"),
                                      ("font-size", "16px"),
                                      ("cursor", "pointer")]
+             -- Crear el pie de página
+    footer <- UI.div # set style [("background-color", "#2c3e50"),
+             ("color", "white"),
+          ("text-align", "center"),
+          ("padding", "10px 0"),
+          ("position", "absolute"),
+          ("bottom", "0"),
+          ("width", "100%"),
+          ("font-family", "Arial, sans-serif"),
+           ("box-shadow", "0px -4px 8px rgba(0,0,0,0.1)")]
+           #+ [UI.p # set text "© 2024 Sistema Médico. Todos los derechos reservados."]
 
     layout <- column
         [ element menuTitle
         , element menuInfo
         , row [element btnRegister, element btnView, element btnBack]
-        ] # set style [("text-align", "center"),
-                      ("margin-top", "30px"),
-                      ("padding", "20px"),
-                      ("font-family", "Arial, sans-serif")]
+        ] # set style [("display", "flex"), 
+        ("flex-direction", "column"), 
+       ("align-items", "center"), 
+       ("justify-content", "center"),
+       ("height", "calc(100vh - 120px)"),
+         ("margin", "0 auto")]
 
-    getBody window #+ [element layout]
+    getBody window #+ [element header,element layout,element footer]
 
     -- Acciones de los botones
     on UI.click btnRegister $ \_ -> createPatientForm window
@@ -85,6 +107,15 @@ runReports window = do
 createPatientForm :: Window -> UI ()
 createPatientForm window = do
     getBody window # set children [] -- Limpia la ventana
+    header <- UI.div # set style [("background-color", "#3498db"),
+     ("color", "white"),
+     ("text-align", "center"),
+       ("padding", "20px 0"),
+       ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
+        #+ [UI.h1 # set text "Bienvenido al Sistema Médico" 
+       # set style [("font-size", "28px"),
+         ("font-family", "Arial, sans-serif"),
+           ("margin", "0")]]
 
     title <- UI.h1 # set text "Registrar Nuevo Medicamento"
                    # set style [("font-size", "36px"),
@@ -125,6 +156,16 @@ createPatientForm window = do
                                       ("border", "none"),
                                       ("font-size", "16px"),
                                       ("cursor", "pointer")]
+    footer <- UI.div # set style [("background-color", "#2c3e50"),
+                                      ("color", "white"),
+                                   ("text-align", "center"),
+                                   ("padding", "10px 0"),
+                                   ("position", "absolute"),
+                                   ("bottom", "0"),
+                                   ("width", "100%"),
+                                   ("font-family", "Arial, sans-serif"),
+                                    ("box-shadow", "0px -4px 8px rgba(0,0,0,0.1)")]
+                                    #+ [UI.p # set text "© 2024 Sistema Médico. Todos los derechos reservados."]
 
     layout <- column
         [ element title
@@ -132,11 +173,14 @@ createPatientForm window = do
         , element inputDob
         , element inputDiagnosis
         , row [element btnSave, element btnCancel]
-        ] # set style [("text-align", "center"),
-                      ("padding", "20px"),
-                      ("font-family", "Arial, sans-serif")]
+        ] # set style [("display", "flex"), 
+        ("flex-direction", "column"), 
+       ("align-items", "center"), 
+       ("justify-content", "center"),
+       ("height", "calc(100vh - 120px)"),
+         ("margin", "0 auto")]
 
-    getBody window #+ [element layout]
+    getBody window #+ [element header,element layout,element footer]
 
     -- Acciones de los botones
     on UI.click btnSave $ \_ -> do
@@ -153,6 +197,7 @@ createPatientForm window = do
         runReports window
 
     on UI.click btnCancel $ \_ -> do
+        getBody window # set children [] -- Limpia la ventana
         -- Volver al menú principal
         runReports window
 
@@ -160,6 +205,15 @@ createPatientForm window = do
 viewPatients :: Window -> UI ()
 viewPatients window = do
     getBody window # set children [] -- Limpia la ventana
+    header <- UI.div # set style [("background-color", "#3498db"),
+     ("color", "white"),
+     ("text-align", "center"),
+       ("padding", "20px 0"),
+       ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
+        #+ [UI.h1 # set text "Bienvenido al Sistema Médico" 
+       # set style [("font-size", "28px"),
+         ("font-family", "Arial, sans-serif"),
+           ("margin", "0")]]
 
     title <- UI.h1 # set text "Medicamentos Registrados"
                    # set style [("font-size", "36px"),
@@ -191,13 +245,18 @@ viewPatients window = do
         [ element title
         , element patientsLayout
         , element btnBack
-        ] # set style [("text-align", "center"),
-                      ("padding", "20px"),
-                      ("font-family", "Arial, sans-serif")]
+        ] # set style [("display", "flex"), 
+        ("flex-direction", "column"), 
+       ("align-items", "center"), 
+      
+       ("height", "calc(100vh - 120px)"),
+         ("margin", "0 auto")]
 
-    getBody window #+ [element layout]
+    getBody window #+ [element header,element layout]
 
-    on UI.click btnBack $ \_ -> runReports window
+    on UI.click btnBack $ \_ -> do
+        getBody window # set children [] -- Limpia la ventana    
+    runReports window
 
 -- Crear una representación visual de un paciente
 createPatientElement :: Patient -> UI Element
@@ -331,7 +390,9 @@ dispatchMedicationForm window = do
         -- Volver al menú principal
         runReports window
 
-    on UI.click btnCancel $ \_ -> runReports window
+    on UI.click btnCancel $ \_ -> do 
+        getBody window # set children [] -- Limpia la ventana
+        runReports window
 
 -- Función para despachar un medicamento
 dispatchMedication :: (String, String, Int) -> IO (Either String ())

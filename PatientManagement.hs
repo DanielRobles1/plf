@@ -97,7 +97,7 @@ runPatientManagement window = do
 
     -- Acciones de los botones
     on UI.click btnRegister $ \_ -> createPatientForm window
-    on UI.click btnView $ \_ -> viewPatients window
+    on UI.click btnView $ \_ ->  viewPatients window
     on UI.click btnBack $ \_ -> do
         getBody window # set children [] -- Limpia la ventana
         runFunction $ ffi "alert('Volviendo al menú principal')"
@@ -106,6 +106,16 @@ runPatientManagement window = do
 createPatientForm :: Window -> UI ()
 createPatientForm window = do
     getBody window # set children [] -- Limpia la ventana
+            -- Crear el encabezado con un diseño moderno
+    header <- UI.div # set style [("background-color", "#3498db"),
+            ("color", "white"),
+          ("text-align", "center"),
+          ("padding", "20px 0"),
+          ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
+            #+ [UI.h1 # set text "Bienvenido al Sistema Médico" 
+           # set style [("font-size", "28px"),
+            ("font-family", "Arial, sans-serif"),
+              ("margin", "0")]]
 
     title <- UI.h1 # set text "Registrar Nuevo Paciente"
                    # set style [("font-size", "36px"),
@@ -146,6 +156,18 @@ createPatientForm window = do
                                       ("border", "none"),
                                       ("font-size", "16px"),
                                       ("cursor", "pointer")]
+          -- Crear el pie de página
+    footer <- UI.div # set style [("background-color", "#2c3e50"),
+          ("color", "white"),
+       ("text-align", "center"),
+       ("padding", "10px 0"),
+       ("position", "absolute"),
+       ("bottom", "0"),
+       ("width", "100%"),
+       ("font-family", "Arial, sans-serif"),
+        ("box-shadow", "0px -4px 8px rgba(0,0,0,0.1)")]
+        #+ [UI.p # set text "© 2024 Sistema Médico. Todos los derechos reservados."]
+
 
     layout <- column
         [ element title
@@ -153,11 +175,14 @@ createPatientForm window = do
         , element inputDob
         , element inputDiagnosis
         , row [element btnSave, element btnCancel]
-        ] # set style [("text-align", "center"),
-                      ("padding", "20px"),
-                      ("font-family", "Arial, sans-serif")]
+        ] # set style [("display", "flex"), 
+        ("flex-direction", "column"), 
+       ("align-items", "center"), 
+       ("justify-content", "center"),
+       ("height", "calc(100vh - 120px)"),
+         ("margin", "0 auto")]
 
-    getBody window #+ [element layout]
+    getBody window #+ [element header,element layout,element footer]
 
     -- Acciones de los botones
     on UI.click btnSave $ \_ -> do
@@ -174,6 +199,7 @@ createPatientForm window = do
         runPatientManagement window
 
     on UI.click btnCancel $ \_ -> do
+        getBody window # set children [] -- Limpia la ventana
         -- Volver al menú principal
         runPatientManagement window
 
@@ -181,6 +207,15 @@ createPatientForm window = do
 viewPatients :: Window -> UI ()
 viewPatients window = do
     getBody window # set children [] -- Limpia la ventana
+    header <- UI.div # set style [("background-color", "#3498db"),
+     ("color", "white"),
+     ("text-align", "center"),
+     ("padding", "20px 0"),
+      ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
+         #+ [UI.h1 # set text "Bienvenido al Sistema Médico" 
+       # set style [("font-size", "28px"),
+       ("font-family", "Arial, sans-serif"),
+      ("margin", "0")]]
 
     title <- UI.h1 # set text "Pacientes Registrados"
                    # set style [("font-size", "36px"),
@@ -212,13 +247,18 @@ viewPatients window = do
         [ element title
         , element patientsLayout
         , element btnBack
-        ] # set style [("text-align", "center"),
-                      ("padding", "20px"),
-                      ("font-family", "Arial, sans-serif")]
+        ] # set style [("display", "flex"), 
+        ("flex-direction", "column"), 
+       ("align-items", "center"), 
+      
+       ("height", "calc(100vh - 120px)"),
+         ("margin", "0 auto")]
 
-    getBody window #+ [element layout]
+    getBody window #+ [element header,element layout]
 
-    on UI.click btnBack $ \_ -> runPatientManagement window
+    on UI.click btnBack $ \_ -> do 
+     getBody window # set children [] -- Limpia la ventana    
+    runPatientManagement window
 
 -- Crear una representación visual de un paciente
 createPatientElement :: Patient -> UI Element

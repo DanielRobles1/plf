@@ -22,12 +22,20 @@ consultationsFile = "consultations.csv"
 setup :: Window -> UI ()
 setup window = do
     return window # set UI.title "Sistema de Búsqueda Médica"
-
+    head <- UI.div # set style [("background-color", "#3498db"),
+     ("color", "white"),
+     ("text-align", "center"),
+     ("padding", "20px 0"),
+     ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
+     #+ [UI.h1 # set text "Bienvenido al Sistema Médico" 
+       # set style [("font-size", "28px"),
+      ("font-family", "Arial, sans-serif"),
+      ("margin", "0")]]
     -- Crear elementos de la interfaz
     header <- UI.div #. "header" #+
         [ UI.h1 #+ [UI.string "Sistema de Búsqueda Médica"]
-            # set style [("font-family", "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"), 
-                         ("color", "#2c3e50"), 
+            # set style [("background-color", "#3498db"),("font-family", "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"), 
+                         ("color", "white"), 
                          ("font-size", "36px"), 
                          ("margin", "0"), 
                          ("padding", "20px 0")]

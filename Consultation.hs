@@ -63,6 +63,17 @@ splitOnChar delimiter str =
 runConsultation :: Window -> [Consultation] -> UI ()
 
 runConsultation window consultations = do
+      -- Crear el encabezado con un diseño moderno
+    header <- UI.div # set style [("background-color", "#3498db"),
+                                  ("color", "white"),
+                                  ("text-align", "center"),
+                                  ("padding", "20px 0"),
+                                  ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
+                                  #+ [UI.h1 # set text "Bienvenido al Sistema Médico" 
+                                 # set style [("font-size", "28px"),
+                                ("font-family", "Arial, sans-serif"),
+                                 ("margin", "0")]] 
+
     
     -- Títulos y botones con estilo
     menuTitle <- UI.h1 # set text "Hojas de Consulta"
@@ -100,17 +111,34 @@ runConsultation window consultations = do
                                      ("border", "none"),
                                      ("font-size", "16px"),
                                      ("cursor", "pointer")]
+  -- Crear el pie de página
+    footer <- UI.div # set style [("background-color", "#2c3e50"),
+                                  ("color", "white"),
+                                  ("text-align", "center"),
+                                  ("padding", "10px 0"),
+                                  ("position", "absolute"),
+                                  ("bottom", "0"),
+                                   ("width", "100%"),
+                                   ("font-family", "Arial, sans-serif"),
+                                    ("box-shadow", "0px -4px 8px rgba(0,0,0,0.1)")]
+                                  #+ [UI.p # set text "© 2024 Sistema Médico. Todos los derechos reservados."]
+
 
     layout <- column
         [ element menuTitle
         , element menuInfo
         , row [element btnNew, element btnView, element btnBack]
-        ] # set style [("text-align", "center"),
-                      ("margin-top", "30px"),
-                      ("padding", "20px"),
-                      ("font-family", "Arial, sans-serif")]
-
-    getBody window #+ [element layout]
+        ] # set style [("display", "flex"), 
+        ("flex-direction", "column"), 
+       ("align-items", "center"), 
+       ("justify-content", "center"),
+       ("height", "calc(100vh - 120px)"),
+         ("margin", "0 auto")]
+    getBody window # set style [("background-color", "#f4f6f6"),
+         ("font-family", "Arial, sans-serif"),
+         ("margin", "0"),
+         ("padding", "0")]
+    getBody window #+ [element header, element layout, element footer]
 
     -- Acciones de los botones
     on UI.click btnNew $ \_ -> createConsultation window consultations
@@ -122,6 +150,17 @@ runConsultation window consultations = do
 createConsultation :: Window -> [Consultation] -> UI ()
 createConsultation window consultations = do
     getBody window # set children [] -- Limpia la ventana
+
+          -- Crear el encabezado con un diseño moderno
+    header <- UI.div # set style [("background-color", "#3498db"),
+          ("color", "white"),
+          ("text-align", "center"),
+          ("padding", "20px 0"),
+          ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
+          #+ [UI.h1 # set text "Bienvenido al Sistema Médico" 
+         # set style [("font-size", "28px"),
+        ("font-family", "Arial, sans-serif"),
+         ("margin", "0")]] 
 
     -- Entradas de texto con diseño
     title <- UI.h1 # set text "Crear Nueva Consulta"
@@ -175,6 +214,17 @@ createConsultation window consultations = do
                                       ("border", "none"),
                                       ("font-size", "16px"),
                                       ("cursor", "pointer")]
+    -- Crear el pie de página
+    footer <- UI.div # set style [("background-color", "#2c3e50"),
+                                  ("color", "white"),
+                                  ("text-align", "center"),
+                                  ("padding", "10px 0"),
+                                  ("position", "absolute"),
+                                  ("bottom", "0"),
+                                   ("width", "100%"),
+                                   ("font-family", "Arial, sans-serif"),
+                                    ("box-shadow", "0px -4px 8px rgba(0,0,0,0.1)")]
+                                  #+ [UI.p # set text "© 2024 Sistema Médico. Todos los derechos reservados."]
 
     layout <- column
         [ element title
@@ -184,11 +234,18 @@ createConsultation window consultations = do
         , element inputTreatment
         , element inputNotes
         , row [element btnSave, element btnCancel]
-        ] # set style [("text-align", "center"),
-                      ("padding", "20px"),
-                      ("font-family", "Arial, sans-serif")]
+        ] # set style [("display", "flex"), 
+        ("flex-direction", "column"), 
+       ("align-items", "center"), 
+       ("justify-content", "center"),
+       ("height", "calc(100vh - 120px)"),
+         ("margin", "0 auto")]
 
-    getBody window #+ [element layout]
+    getBody window # set style [("background-color", "#f4f6f6"),
+                      ("font-family", "Arial, sans-serif"),
+                      ("margin", "0"),
+                      ("padding", "0")]
+    getBody window #+ [element header, element layout, element footer]
 
     -- Acciones de los botones
     on UI.click btnSave $ \_ -> do
@@ -224,6 +281,7 @@ createConsultation window consultations = do
 -- Función auxiliar para convertir una consulta en un elemento estilizado de UI
 createConsultationElement :: Consultation -> UI Element
 createConsultationElement (date, doctor, diagnosis, treatment, notes) = do
+
     -- Estructura tipo "tarjeta"
     UI.div #+ 
         [ UI.h3 # set text ("Fecha: " ++ date)
@@ -258,7 +316,16 @@ createConsultationElement (date, doctor, diagnosis, treatment, notes) = do
 viewConsultations :: Window -> [Consultation] -> UI ()
 viewConsultations window consultations = do
     getBody window # set children [] -- Limpia la ventana
-
+     -- Crear el encabezado con un diseño moderno
+    header <- UI.div # set style [("background-color", "#3498db"),
+                                      ("color", "white"),
+        ("text-align", "center"),
+        ("padding", "20px 0"),
+        ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
+      #+ [UI.h1 # set text "Bienvenido al Sistema Médico" 
+     # set style [("font-size", "28px"),
+         ("font-family", "Arial, sans-serif"),
+            ("margin", "0")]] 
     title <- UI.h1 # set text "Consultas Registradas"
                    # set style [("font-size", "36px"),
                                ("color", "#2c3e50"),
@@ -283,17 +350,34 @@ viewConsultations window consultations = do
                                      ("font-size", "16px"),
                                      ("cursor", "pointer"),
                                      ("margin-top", "20px")]
+        -- Crear el pie de página
+    footer <- UI.div # set style [("background-color", "#2c3e50"),
+        ("color", "white"),
+        ("text-align", "center"),
+        ("padding", "10px 0"),
+        ("position", "absolute"),
+        ("bottom", "0"),
+         ("width", "100%"),
+         ("font-family", "Arial, sans-serif"),
+          ("box-shadow", "0px -4px 8px rgba(0,0,0,0.1)")]
+        #+ [UI.p # set text "© 2024 Sistema Médico. Todos los derechos reservados."]
+
 
     layout <- column
         [ element title
         , element consultationsLayout
         , element btnBack
-        ] # set style [("text-align", "center"),
-                      ("padding", "20px"),
-                      ("font-family", "Arial, sans-serif")]
+        ] # set style [("display", "flex"), 
+        ("flex-direction", "column"), 
+       ("align-items", "center"), 
+      
+       ("height", "calc(100vh - 120px)"),
+         ("margin", "0 auto")]
 
-    getBody window #+ [element layout]
+    getBody window #+ [element header,element layout]
 
-    on UI.click btnBack $ \_ -> runConsultation window consultations
+    on UI.click btnBack $ \_ -> do
+         getBody window # set children [] -- Limpia la ventana
+         runConsultation window consultations
     
     

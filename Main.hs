@@ -19,6 +19,13 @@ setup :: Window -> UI ()
 setup window = do
     -- Configurar el título de la ventana
     return window # set title "Sistema Médico"
+    -- Crear la imagen del logo o encabezado
+    logo <- UI.img # set UI.src "https://th.bing.com/th/id/OIP.j95H8zR_TuTN8WhwYqgVoAHaHa?w=736&h=736&rs=1&pid=ImgDetMain"
+                   # set style [("display", "block"),
+                               ("margin", "0 auto"),
+                               ("width", "150px"), -- Ajusta el tamaño de la imagen
+                               ("height", "auto"),
+                               ("margin-top", "20px")]
 
     -- Crear el encabezado con un diseño moderno
     header <- UI.div # set style [("background-color", "#3498db"),
@@ -114,17 +121,18 @@ setup window = do
                                   ("box-shadow", "0px -4px 8px rgba(0,0,0,0.1)")]
                      #+ [UI.p # set text "© 2024 Sistema Médico. Todos los derechos reservados."]
 
-    -- Disposición inicial
+     -- Disposición inicial (incluye la imagen antes del título)
     layout <- column
-        [ element menuTitle
-        , element menuInfo
-        , row [element btnConsultations, element btnPatientManagement, element btnSearch, element btnReports, element btnMedication, element btnExit]
-        ] # set style [("display", "flex"), 
-                      ("flex-direction", "column"), 
-                      ("align-items", "center"), 
-                      ("justify-content", "center"),
-                      ("height", "calc(100vh - 120px)"),
-                      ("margin", "0 auto")]
+     [ element logo
+     , element menuTitle
+     , element menuInfo
+     , row [element btnConsultations, element btnPatientManagement, element btnSearch, element btnReports, element btnMedication, element btnExit]
+     ] # set style [("display", "flex"), 
+                   ("flex-direction", "column"), 
+                   ("align-items", "center"), 
+                   ("justify-content", "center"),
+                   ("height", "calc(100vh - 120px)"),
+                   ("margin", "0 auto")]
 
     -- Aplicar estilo general al cuerpo
     getBody window # set style [("background-color", "#f4f6f6"),
