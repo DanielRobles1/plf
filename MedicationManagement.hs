@@ -207,33 +207,34 @@ viewPatients :: Window -> UI ()
 viewPatients window = do
     getBody window # set children [] -- Limpia la ventana
 
-              -- Crear el encabezado con un diseño moderno
+    -- Crear el encabezado con un diseño moderno
     header <- UI.div # set style [("background-color", "#3498db"),
-              ("color", "white"),
-              ("text-align", "center"),
-              ("padding", "20px 0"),
-              ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
-              #+ [UI.h1 # set text "Bienvenido al Sistema Médico" 
-             # set style [("font-size", "28px"),
-            ("font-family", "Arial, sans-serif"),
-             ("margin", "0")]] 
-    
+                                  ("color", "white"),
+                                  ("text-align", "center"),
+                                  ("padding", "20px 0"),
+                                  ("box-shadow", "0px 4px 8px rgba(0,0,0,0.1)")]
+                     #+ [UI.h1 # set text "Bienvenido al Sistema Médico"
+                              # set style [("font-size", "28px"),
+                                           ("font-family", "Arial, sans-serif"),
+                                           ("margin", "0")]]
 
-    title <- UI.h1 # set text "Despachos de medicamentos Registrados"
+    title <- UI.h1 # set text "Descargar despacho de medicamentos"
                    # set style [("font-size", "36px"),
                                ("color", "#2c3e50"),
                                ("text-align", "center"),
                                ("margin-bottom", "20px"),
                                ("font-family", "Arial, sans-serif")]
 
-    patientsList <- liftIO loadPatients
-    patientsLayout <- if null patientsList
-        then UI.p # set text "No hay pacientes registrados."
-                  # set style [("font-size", "18px"),
-                              ("color", "#34495e"),
-                              ("text-align", "center"),
-                              ("font-family", "Arial, sans-serif")]
-        else UI.div #+ map createPatientElement patientsList
+    -- Botón para generar y descargar el archivo CSV
+    btnDownload <- UI.button # set text "Descargar CSV"
+                             # set style [("background-color", "#00bfae"),
+                                         ("color", "white"),
+                                         ("padding", "12px 25px"),
+                                         ("border-radius", "8px"),
+                                         ("border", "none"),
+                                         ("font-size", "16px"),
+                                         ("cursor", "pointer"),
+                                         ("margin-top", "20px")]
 
     btnBack <- UI.button # set text "Volver"
                          # set style [("background-color", "#e74c3c"),
@@ -244,34 +245,44 @@ viewPatients window = do
                                      ("font-size", "16px"),
                                      ("cursor", "pointer"),
                                      ("margin-top", "20px")]
--- Crear el pie de página
+
     footer <- UI.div # set style [("background-color", "#2c3e50"),
                                   ("color", "white"),
-                                 ("text-align", "center"),
-                                ("padding", "10px 0"),
-                                 ("position", "absolute"),
-                                ("bottom", "0"),
-                                 ("width", "100%"),
-                                 ("font-family", "Arial, sans-serif"),
-                                ("box-shadow", "0px -4px 8px rgba(0,0,0,0.1)")]
-                                #+ [UI.p # set text "© 2024 Sistema Médico. Todos los derechos reservados."]
+                                  ("text-align", "center"),
+                                  ("padding", "10px 0"),
+                                  ("position", "absolute"),
+                                  ("bottom", "0"),
+                                  ("width", "100%"),
+                                  ("font-family", "Arial, sans-serif"),
+                                  ("box-shadow", "0px -4px 8px rgba(0,0,0,0.1)")]
+                     #+ [UI.p # set text "© 2024 Sistema Médico. Todos los derechos reservados."]
 
     layout <- column
         [ element title
-        , element patientsLayout
+        , element btnDownload
         , element btnBack
-        ] # set style [("display", "flex"), 
-        ("flex-direction", "column"), 
-       ("align-items", "center"), 
-      
-       ("height", "calc(100vh - 120px)"),
-         ("margin", "0 auto")]
+        ] # set style [("display", "flex"),
+                       ("flex-direction", "column"),
+                       ("align-items", "center"),
+                       ("justify-content", "center"),
+                       ("height", "calc(100vh - 120px)"),
+                       ("margin", "0 auto")]
 
-    getBody window #+ [element header,element layout,element footer]
+    getBody window #+ [element header, element layout, element footer]
 
+    -- Acción del botón de descarga
+    on UI.click btnDownload $ \_ -> do
+        patientsList <- liftIO loadPatients
+        let csvContent = unlines $ map formatPatientCSV patientsList
+        let filename = "despachos_medicamentos.csv"
+        runFunction $ ffi "const blob = new Blob([%1], {type: 'text/csv'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = %2; document.body.appendChild(a); a.click(); document.body.removeChild(a);"
+                      csvContent
+                      filename
+
+    -- Acción del botón volver
     on UI.click btnBack $ \_ -> do
-      getBody window # set children [] -- Limpia la ventana    
-    runMedicationManagement window
+        getBody window # set children [] -- Limpia la ventana    
+        runMedicationManagement window
 
 -- Crear una representación visual de un paciente
 createPatientElement :: Patient -> UI Element
