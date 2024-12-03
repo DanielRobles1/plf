@@ -19,7 +19,7 @@ setup :: Window -> UI ()
 setup window = do
     -- Configurar el título de la ventana
     return window # set title "Sistema Médico"
-    -- Crear la imagen del logo o encabezado
+    -- Crear la imagen 
     logo <- UI.img # set UI.src "https://th.bing.com/th/id/OIP.j95H8zR_TuTN8WhwYqgVoAHaHa?w=736&h=736&rs=1&pid=ImgDetMain"
                    # set style [("display", "block"),
                                ("margin", "0 auto"),
@@ -27,7 +27,7 @@ setup window = do
                                ("height", "auto"),
                                ("margin-top", "20px")]
 
-    -- Crear el encabezado con un diseño moderno
+    -- Crear el encabezado 
     header <- UI.div # set style [("background-color", "#3498db"),
                                   ("color", "white"),
                                   ("text-align", "center"),

@@ -368,6 +368,10 @@ dispatchMedicationForm window = do
         ] # set style [("text-align", "center"),
                       ("padding", "30px"),
                       ("font-family", "Arial, sans-serif")]
+    getBody window # set style [("background-color", "#f4f6f6"),
+                      ("font-family", "Arial, sans-serif"),
+                      ("margin", "0"),
+                      ("padding", "0")]
 
     getBody window #+ [element layout]
 
